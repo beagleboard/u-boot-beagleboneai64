@@ -5,6 +5,10 @@ if ! id | grep -q root; then
 	exit
 fi
 
+if [ -f ./sysfw.itb ] ; then
+	rm -rf ./sysfw.itb || true
+fi
+
 if [ -f ./tiboot3.bin ] ; then
 	rm -rf ./tiboot3.bin || true
 fi
@@ -17,11 +21,13 @@ if [ -f ./u-boot.img ] ; then
 	rm -rf ./u-boot.img || true
 fi
 
-wget https://beagleboard.beagleboard.io/u-boot-beagleplay/tiboot3.bin
-wget https://beagleboard.beagleboard.io/u-boot-beagleplay/tispl.bin
-wget https://beagleboard.beagleboard.io/u-boot-beagleplay/u-boot.img
+wget https://beagleboard.beagleboard.io/u-boot-beagleboneai64/sysfw.itb
+wget https://beagleboard.beagleboard.io/u-boot-beagleboneai64/tiboot3.bin
+wget https://beagleboard.beagleboard.io/u-boot-beagleboneai64/tispl.bin
+wget https://beagleboard.beagleboard.io/u-boot-beagleboneai64/u-boot.img
 
 if [ -d /boot/firmware/ ] ; then
+	cp -v ./sysfw.itb /boot/firmware/
 	cp -v ./tiboot3.bin /boot/firmware/
 	cp -v ./tispl.bin /boot/firmware/
 	cp -v ./u-boot.img /boot/firmware/
@@ -29,6 +35,7 @@ if [ -d /boot/firmware/ ] ; then
 fi
 
 if [ -d /boot/efi/ ] ; then
+	cp -v ./sysfw.itb /boot/efi/
 	cp -v ./tiboot3.bin /boot/efi/
 	cp -v ./tispl.bin /boot/efi/
 	cp -v ./u-boot.img /boot/efi/
