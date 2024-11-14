@@ -2,7 +2,7 @@
 
 #apt-get install -y -q bc bison device-tree-compiler flex gcc-arm-linux-gnueabihf libssl-dev python3-cryptography python3-dev python3-jsonschema python3-pycryptodome python3-pyelftools python3-setuptools python3-yaml swig yamllint
 
-#wget https://robertcnelson.beagleboard.io/u-boot-bisect/get_n_install.sh ; chmod +x get_n_install.sh ; sudo ./get_n_install.sh
+#wget https://beagleboard.beagleboard.io/u-boot-beagleboneai64/get_n_install.sh ; chmod +x get_n_install.sh ; sudo ./get_n_install.sh
 
 CC32=arm-linux-gnueabihf-
 CC64=aarch64-linux-gnu-
@@ -15,7 +15,7 @@ DIR=$PWD
 TI_FIRMWARE="10.01.07"
 TRUSTED_FIRMWARE="v2.11.0"
 OPTEE="4.4.0"
-UBOOT="v2024.10-rc5-Beagle"
+UBOOT="v2024.10-Beagle"
 
 #rm -rf ./ti-linux-firmware/ || true
 if [ ! -d ./ti-linux-firmware/ ] ; then
