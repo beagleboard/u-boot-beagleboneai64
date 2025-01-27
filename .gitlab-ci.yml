@@ -16,7 +16,7 @@ cache:
 
 pages:
   tags:
-    - docker-aarch64-rpi5-ci
+    - docker-aarch64-rpi4-ci
   stage: build
   script:
     - touch .gitlab-runner
