@@ -1,20 +1,17 @@
-image: robertcnelson/beagle-devscripts-kernel-debian-12-arm64:latest
-# https://openbeagle.org/beagleboard/ci-docker-images
-
 before_script:
   - export PATH=/usr/lib/ccache:$PATH
   - echo "Acquire::http::Proxy \"http://192.168.1.10:3142\";" > /etc/apt/apt.conf.d/00aptproxy
   - apt-get update
-  - apt-get upgrade -yq
   - apt-get dist-upgrade -yq
   - apt-get install -yq ccache device-tree-compiler gcc-arm-linux-gnueabihf libgnutls28-dev python3-cryptography python3-dev python3-jsonschema python3-pycryptodome python3-pyelftools python3-setuptools python3-yaml swig uuid-dev yamllint
 
-cache:
-  key: "$CI_PROJECT_NAME"
-  paths:
-    - ccache.tar.lz4
-
 pages:
+  image: robertcnelson/beagle-devscripts-kernel-debian-12-arm64:latest
+  # https://openbeagle.org/beagleboard/ci-docker-images
+  cache:
+    key: "$CI_PROJECT_NAME-debian-12-arm64"
+    paths:
+      - ccache.tar.lz4
   tags:
     - docker-aarch64-rpi4-ci
   stage: build
