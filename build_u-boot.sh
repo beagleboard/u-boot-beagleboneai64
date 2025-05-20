@@ -12,9 +12,9 @@ ${CC64}gcc --version
 
 DIR=$PWD
 
-TI_FIRMWARE="11.00.10"
-TRUSTED_FIRMWARE="lts-v2.12.1"
-OPTEE="4.6.0-rc1"
+TI_FIRMWARE="11.00.13"
+TRUSTED_FIRMWARE="lts-v2.12.2"
+OPTEE="4.6.0"
 UBOOT="v2025.04-Beagle"
 
 #rm -rf ./ti-linux-firmware/ || true
