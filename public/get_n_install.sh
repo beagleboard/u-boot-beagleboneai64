@@ -21,10 +21,10 @@ if [ -f ./u-boot.img ] ; then
 	rm -rf ./u-boot.img || true
 fi
 
-https://github.com/beagleboard/u-boot-beagleboneai64/releases/download/v2025.07-rc4-Beagle-11.01.01/sysfw.itb
-https://github.com/beagleboard/u-boot-beagleboneai64/releases/download/v2025.07-rc4-Beagle-11.01.01/tiboot3.bin
-https://github.com/beagleboard/u-boot-beagleboneai64/releases/download/v2025.07-rc4-Beagle-11.01.01/tispl.bin
-https://github.com/beagleboard/u-boot-beagleboneai64/releases/download/v2025.07-rc4-Beagle-11.01.01/u-boot.img
+wget https://github.com/beagleboard/u-boot-beagleboneai64/releases/download/v2025.07-rc5-Beagle-11.01.03/sysfw.itb
+wget https://github.com/beagleboard/u-boot-beagleboneai64/releases/download/v2025.07-rc5-Beagle-11.01.03/tiboot3.bin
+wget https://github.com/beagleboard/u-boot-beagleboneai64/releases/download/v2025.07-rc5-Beagle-11.01.03/tispl.bin
+wget https://github.com/beagleboard/u-boot-beagleboneai64/releases/download/v2025.07-rc5-Beagle-11.01.03/u-boot.img
 
 if [ -d /boot/firmware/ ] ; then
 	cp -v ./sysfw.itb /boot/firmware/
