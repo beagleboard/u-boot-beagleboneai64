@@ -23,7 +23,7 @@ fi
 
 wget https://beagle-pkgs.gitlab.io/u-boot-beagleboneai64/sysfw.itb
 wget https://beagle-pkgs.gitlab.io/u-boot-beagleboneai64/tiboot3.bin
-wget https://beagle-pkgs.gitlab.io/u-boot-beagleboneai64/tiboot3.bin
+wget https://beagle-pkgs.gitlab.io/u-boot-beagleboneai64/tispl.bin
 wget https://beagle-pkgs.gitlab.io/u-boot-beagleboneai64/u-boot.img
 
 if [ -d /boot/firmware/ ] ; then
