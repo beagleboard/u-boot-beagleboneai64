@@ -26,6 +26,8 @@ wget https://github.com/beagleboard/u-boot-beagleboneai64/releases/download/TAG/
 wget https://github.com/beagleboard/u-boot-beagleboneai64/releases/download/TAG/tispl.bin
 wget https://github.com/beagleboard/u-boot-beagleboneai64/releases/download/TAG/u-boot.img
 
+sync
+
 if [ -d /boot/firmware/ ] ; then
 	cp -v ./sysfw.itb /boot/firmware/
 	cp -v ./tiboot3.bin /boot/firmware/

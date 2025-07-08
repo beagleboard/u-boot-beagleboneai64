@@ -26,6 +26,8 @@ wget https://beagle-pkgs.gitlab.io/u-boot-beagleboneai64/tiboot3.bin
 wget https://beagle-pkgs.gitlab.io/u-boot-beagleboneai64/tispl.bin
 wget https://beagle-pkgs.gitlab.io/u-boot-beagleboneai64/u-boot.img
 
+sync
+
 if [ -d /boot/firmware/ ] ; then
 	cp -v ./sysfw.itb /boot/firmware/
 	cp -v ./tiboot3.bin /boot/firmware/
