@@ -10,4 +10,4 @@ TRUSTED_FIRMWARE="lts-v2.12.4"
 OPTEE="4.7.0-rc1"
 
 #https://github.com/beagleboard/u-boot.git
-UBOOT="${UBOOT:-v2025.07}"
+UBOOT="${UBOOT:-v2025.07-Beagle}"
