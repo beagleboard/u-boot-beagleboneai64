@@ -2,8 +2,26 @@
 
 #apt-get install -y -q bc bison device-tree-compiler flex gcc-arm-linux-gnueabihf libssl-dev python3-cryptography python3-dev python3-jsonschema python3-pycryptodome python3-pyelftools python3-setuptools python3-yaml swig yamllint
 
-CC32=arm-linux-gnueabihf-
+check_command() {
+    command -v -- "$1" >/dev/null 2>&1
+}
+
+# Check for debian compiler
+if check_command arm-linux-gnueabihf-gcc; then
+	CC32=arm-linux-gnueabihf-
+# Check for fedora compiler
+elif check_command arm-linux-gnu-gcc; then
+	CC32=arm-linux-gnu-
+else
+	echo "CC32 not found"
+	exit 1
+fi
+
 CC64=aarch64-linux-gnu-
+if ! check_command ${CC64}gcc; then
+	echo "CC64 not found"
+	exit 1
+fi
 
 ${CC32}gcc --version
 ${CC64}gcc --version
@@ -13,7 +31,7 @@ DIR=$PWD
 . version.sh
 
 echo "****************************************************"
-echo [${UBOOT}:${TRUSTED_FIRMWARE}:${OPTEE}:${TI_FIRMWARE}]
+echo [${UBOOT}:${TFA}:${OPTEE}:${TI_FIRMWARE}]
 echo "****************************************************"
 
 #rm -rf ./ti-linux-firmware/ || true
@@ -22,19 +40,19 @@ if [ ! -d ./ti-linux-firmware/ ] ; then
 		echo "git clone -b ${TI_FIRMWARE} http://forgejo.gfnd.rcn-ee.org:3000/TexasInstruments/ti-linux-firmware.git"
 		git clone -b ${TI_FIRMWARE} http://forgejo.gfnd.rcn-ee.org:3000/TexasInstruments/ti-linux-firmware.git --depth=1 ./ti-linux-firmware/
 	else
-		echo "git clone -b ${TI_FIRMWARE} https://github.com/beagleboard/ti-linux-firmware.git"
-		git clone -b ${TI_FIRMWARE} https://github.com/beagleboard/ti-linux-firmware.git --depth=1 ./ti-linux-firmware/
+		echo "git clone -b ${TI_FIRMWARE} https://github.com/TexasInstruments/ti-linux-firmware.git"
+		git clone -b ${TI_FIRMWARE} https://github.com/TexasInstruments/ti-linux-firmware.git --depth=1 ./ti-linux-firmware/
 	fi
 fi
 
 #rm -rf ./trusted-firmware-a/ || true
 if [ ! -d ./trusted-firmware-a/ ] ; then
 	if [ -f .gitlab-runner ] ; then
-		echo "git clone -b ${TRUSTED_FIRMWARE} http://forgejo.gfnd.rcn-ee.org:3000/mirror/trusted-firmware-a.git"
-		git clone -b ${TRUSTED_FIRMWARE} http://forgejo.gfnd.rcn-ee.org:3000/mirror/trusted-firmware-a.git --depth=1 ./trusted-firmware-a/
+		echo "git clone -b ${TFA} http://forgejo.gfnd.rcn-ee.org:3000/mirror/trusted-firmware-a.git"
+		git clone -b ${TFA} http://forgejo.gfnd.rcn-ee.org:3000/mirror/trusted-firmware-a.git --depth=1 ./trusted-firmware-a/
 	else
-		echo "git clone -b ${TRUSTED_FIRMWARE} https://github.com/TrustedFirmware-A/trusted-firmware-a.git"
-		git clone -b ${TRUSTED_FIRMWARE} https://github.com/TrustedFirmware-A/trusted-firmware-a.git --depth=1 ./trusted-firmware-a/
+		echo "git clone -b ${TFA} ${TFA_GIT}"
+		git clone -b ${TFA} ${TFA_GIT} --depth=1 ./trusted-firmware-a/
 	fi
 fi
 
@@ -49,15 +67,11 @@ if [ ! -d ./optee_os/ ] ; then
 	fi
 fi
 
-if [ -d ./u-boot/ ] ; then
-	rm -rf ./u-boot/
+#rm -rf ./u-boot/ || true
+if [ ! -d ./u-boot/ ] ; then
+	echo "git clone -b ${UBOOT} ${UBOOT_GIT} --depth=1 ./u-boot/"
+	git clone -b ${UBOOT} ${UBOOT_GIT} --depth=1 ./u-boot/
 fi
-
-global="https://github.com/beagleboard/u-boot.git"
-mirror="${global}"
-
-echo "git clone -b ${UBOOT} ${mirror} --depth=1 ./u-boot/"
-git clone -b ${UBOOT} ${mirror} --depth=1 ./u-boot/
 
 mkdir -p ${DIR}/public/
 
@@ -66,6 +80,7 @@ SOC_NAME=j721e
 SECURITY_TYPE=gp
 SIGNED=_unsigned
 TFA_BOARD="generic"
+TFA_EXTRA_ARGS=
 OPTEE_PLATFORM="k3-j721e"
 OPTEE_EXTRA_ARGS=""
 UBOOT_CFG_CORTEXR="j721e_beagleboneai64_r5_defconfig"
