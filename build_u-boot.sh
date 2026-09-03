@@ -130,11 +130,11 @@ mkdir -p "${DIR}/public/"
 
 # --- Build Configuration (BeagleBone AI64) ---
 
-SOC_NAME=j721e
-SECURITY_TYPE=gp
-SIGNED=_unsigned
+SOC_NAME="j721e"
+SECURITY_TYPE="gp"
+SIGNED="_unsigned"
 TFA_BOARD="generic"
-TFA_EXTRA_ARGS=
+TFA_EXTRA_ARGS=""
 OPTEE_PLATFORM="k3-j721e"
 OPTEE_EXTRA_ARGS=""
 UBOOT_CFG_CORTEXR="j721e_beagleboneai64_r5_defconfig"
@@ -203,70 +203,78 @@ rm -rf "${DIR}/optee/"
 
 # --- U-Boot Cortex-R Build ---
 
-log_sep
-echo "Building U-Boot CORTEX-R ($UBOOT_CFG_CORTEXR)..."
-make -C ./u-boot/ O=../CORTEXR CROSS_COMPILE="${CC32}" "${UBOOT_CFG_CORTEXR}"
+build_label="Cortex-R"
+build_dir="CORTEXR"
 
-if ! make -C ./u-boot/ -j"${JOBS}" O=../CORTEXR CROSS_COMPILE="${CC32}" BINMAN_INDIRS="${DIR}/ti-linux-firmware/"; then
-	echo "Error: U-Boot CORTEX-R build failed."
+log_sep
+echo "Building U-Boot ${build_label} ($UBOOT_CFG_CORTEXR)..."
+make -C ./u-boot/ O=../${build_dir} CROSS_COMPILE="${CC32}" "${UBOOT_CFG_CORTEXR}"
+
+if ! make -C ./u-boot/ -j"${JOBS}" O=../${build_dir} CROSS_COMPILE="${CC32}" BINMAN_INDIRS="${DIR}/ti-linux-firmware/"; then
+	echo "Failure in u-boot ${build_label} build of [$UBOOT_CFG_CORTEXR]"
+	ls -lha "${DIR}/${build_dir}/"
 	exit 2
 fi
 
-R_BIN="${DIR}/CORTEXR/tiboot3-${SOC_NAME}-${SECURITY_TYPE}-evm.bin"
-R_ITB="${DIR}/CORTEXR/sysfw-${SOC_NAME}-${SECURITY_TYPE}-evm.itb"
+TIBOOT3_BIN="${DIR}/${build_dir}/tiboot3-${SOC_NAME}-${SECURITY_TYPE}-evm.bin"
+SYSFW_ITB="${DIR}/${build_dir}/sysfw-${SOC_NAME}-${SECURITY_TYPE}-evm.itb"
 
-if [ -f "$R_BIN" ]; then
-	echo "Cortex-R Bin found: $R_BIN ($(( $(stat -c%s "$R_BIN") / 1024 )) KB)"
-	cp -v "$R_BIN" "${DIR}/public/tiboot3.bin"
-	report_and_compare "$R_BIN" "CORTEXR_BIN"
+if [ -f "$TIBOOT3_BIN" ]; then
+	echo "${build_label} Bin found: $TIBOOT3_BIN ($(( $(stat -c%s "$TIBOOT3_BIN") / 1024 )) KB)"
+	cp -v "$TIBOOT3_BIN" "${DIR}/public/tiboot3.bin"
+	report_and_compare "$TIBOOT3_BIN" "TIBOOT3_BIN"
 
-	if [ -f "$R_ITB" ]; then
-		echo "Cortex-R ITB found: $R_ITB ($(( $(stat -c%s "$R_ITB") / 1024 )) KB)"
-		cp -v "$R_ITB" "${DIR}/public/sysfw.itb"
-		report_and_compare "$R_ITB" "CORTEXR_ITB"
+	if [ -f "$SYSFW_ITB" ]; then
+		echo "${build_label} ITB found: $SYSFW_ITB ($(( $(stat -c%s "$SYSFW_ITB") / 1024 )) KB)"
+		cp -v "$SYSFW_ITB" "${DIR}/public/sysfw.itb"
+		report_and_compare "$SYSFW_ITB" "SYSFW_ITB"
 	fi
 else
-	echo "Error: Required CORTEX-R binary $R_BIN not found."
+	echo "Error: Required ${build_label} binary $SYSFW_ITB not found."
 	exit 2
 fi
 
-rm -rf "${DIR}/CORTEXR/"
+rm -rf "${DIR}/${build_dir}/"
 
 # --- U-Boot Cortex-A Build ---
 
+build_label="Cortex-A"
+build_dir="CORTEXA"
+
 if [ -f "${DIR}/public/bl31.bin" ] && [ -f "${DIR}/public/tee-pager_v2.bin" ]; then
 	log_sep
-	echo "Building U-Boot CORTEX-A ($UBOOT_CFG_CORTEXA)..."
+	echo "Building U-Boot ${build_label} ($UBOOT_CFG_CORTEXA)..."
 
-	make -C ./u-boot/ O=../CORTEXA CROSS_COMPILE="${CC64}" "${UBOOT_CFG_CORTEXA}"
+	make -C ./u-boot/ O=../${build_dir} CROSS_COMPILE="${CC64}" "${UBOOT_CFG_CORTEXA}"
 
-	if ! make -C ./u-boot/ -j"${JOBS}" O=../CORTEXA CROSS_COMPILE="${CC64}" \
+	if ! make -C ./u-boot/ -j"${JOBS}" O=../${build_dir} CROSS_COMPILE="${CC64}" \
 		BL31="${DIR}/public/bl31.bin" \
 		TEE="${DIR}/public/tee-pager_v2.bin" \
 		BINMAN_INDIRS="${DIR}/ti-linux-firmware/"; then
-		echo "Error: U-Boot CORTEX-A build failed."
+		echo "Error: U-Boot ${build_label} build failed."
 		exit 2
 	fi
 
-	TISPL_OUT="${DIR}/CORTEXA/tispl.bin${SIGNED}"
-	UBIMG_OUT="${DIR}/CORTEXA/u-boot.img${SIGNED}"
+	TISPL_BIN="${DIR}/${build_dir}/tispl.bin${SIGNED}"
+	UBOOT_IMG="${DIR}/${build_dir}/u-boot.img${SIGNED}"
 
-	if [ -f "$TISPL_OUT" ]; then
-		cp -v "$TISPL_OUT" "${DIR}/public/tispl.bin" || true
-		[ -f "$UBIMG_OUT" ] && cp -v "$UBIMG_OUT" "${DIR}/public/u-boot.img" || true
+	if [ -f "$TISPL_BIN" ]; then
+		cp -v "$TISPL_BIN" "${DIR}/public/tispl.bin" || true
+		[ -f "$UBOOT_IMG" ] && cp -v "$UBOOT_IMG" "${DIR}/public/u-boot.img" || true
 
-		report_and_compare "$TISPL_OUT" "CORTEXA_TISPL"
-		[ -f "$UBIMG_OUT" ] && report_and_compare "$UBIMG_OUT" "CORTEXA_UBIMG"
+		report_and_compare "$TISPL_BIN" "TISPL_BIN"
+		[ -f "$UBOOT_IMG" ] && report_and_compare "$UBOOT_IMG" "UBOOT_IMG"
 	else
-		echo "Failure in u-boot CORTEXA build of [$UBOOT_CFG_CORTEXA]"
-		ls -lha "${DIR}/CORTEXA/"
+		echo "Failure in u-boot ${build_label} build of [$UBOOT_CFG_CORTEXA]"
+		ls -lha "${DIR}/${build_dir}/"
 		exit 2
 	fi
-	rm -rf "${DIR}/CORTEXA/"
 else
 	echo "Error: Missing required dependencies in public/ (bl31.bin or tee-pager_v2.bin)"
 	exit 2
 fi
+
+rm -rf "${DIR}/${build_dir}/"
 
 log_sep
 echo "FINAL BUILD SIZE REPORT"
