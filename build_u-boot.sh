@@ -23,41 +23,39 @@ report_and_compare() {
 	local file_path="$1"
 	local label="$2"
 	local size_file=".last_build_sizes.txt"
+	local summary_file=".build_summary.tmp"
+	local new_sizes_file=".new_sizes.txt"
 
 	if [ -f "$file_path" ]; then
 		local current_bytes
-		current_bytes=$(stat -c%s "$file_path")
+		current_bytes=$(stat -c%s "$file_path" 2>/dev/null || echo 0)
+		[ "$current_bytes" -eq 0 ] && return
+
 		local current_kb=$((current_bytes / 1024))
+		local diff_kb=0
+		local diff_bytes=0
+		local status="NEW"
 
 		if [ -f "$size_file" ]; then
-			local prev_line
-			prev_line=$(grep "^${label}:" "$size_file" || true)
+			local prev_bytes
+			prev_bytes=$(grep "^${label}:" "$size_file" | cut -d':' -f2 || echo "$current_bytes")
 
-			if [ -n "$prev_line" ]; then
-				local prev_bytes
-				prev_bytes=$(echo "$prev_line" | cut -d':' -f2)
-				local prev_kb=$((prev_bytes / 1024))
-				local diff=$((current_bytes - prev_bytes))
+			diff_bytes=$((current_bytes - prev_bytes))
+			diff_kb=$((diff_bytes / 1024))
 
-				if [ "$diff" -gt 0 ]; then
-					echo "[SIZE CHANGE] $label: ${current_kb}KB (Increased by $((diff/1024))KB)"
-				elif [ "$diff" -lt 0 ]; then
-					echo "[SIZE CHANGE] $label: ${current_kb}KB (Decreased by $(( (diff*-1)/1024 ))KB)"
-				else
-					echo "[SIZE MATCH]  $label: ${current_kb}KB (No change)"
-				fi
-			else
-				echo "[NEW SIZE]    $label: ${current_kb}KB"
-			fi
-		else
-			echo "[FIRST RUN]   $label: ${current_kb}KB"
+			if [ "$diff_bytes" -gt 0 ]; then status="INCREASED";
+			elif [ "$diff_bytes" -lt 0 ]; then status="DECREASED";
+			else status="UNCHANGED"; fi
 		fi
-		echo "${label}:${current_bytes}" >> .new_sizes.txt
+
+		echo "[$status] $label: ${current_kb}KB"
+		echo "${label}|${current_bytes}|${diff_bytes}|${diff_kb}|${status}" >> "$summary_file"
+		echo "${label}:${current_bytes}" >> "$new_sizes_file"
 	fi
 }
 
 log_sep() {
-	echo "****************************************************"
+	echo "************************************************************************************"
 }
 
 # --- Compiler Detection ---
@@ -270,6 +268,39 @@ else
 	exit 2
 fi
 
+log_sep
+echo "FINAL BUILD SIZE REPORT"
+printf "%-15s | %-12s | %-12s | %-12s | %-10s\n" "COMPONENT" "SIZE (KB)" "DIFF (KB)" "DIFF (B)" "STATUS"
+echo "------------------------------------------------------------------------------------"
+
+if [ -f ".build_summary.tmp" ]; then
+	while IFS='|' read -r label current_bytes diff_bytes diff_kb status; do
+		# Convert current_bytes to KB for the table
+		current_kb=$((current_bytes / 1024))
+
+		# Format the diff string to show +/-
+		if [ "$diff_bytes" -gt 0 ]; then
+			diff_str_kb="+${diff_kb}KB"
+			diff_str_b="+${diff_bytes}B"
+		elif [ "$diff_bytes" -lt 0 ]; then
+			# Use absolute value for display
+			abs_diff_kb=$(( (diff_kb * -1) ))
+			abs_diff_b=$(( (diff_bytes * -1) ))
+			diff_str_kb="-${abs_diff_kb}KB"
+			diff_str_b="-${abs_diff_b}B"
+		else
+			diff_str_kb="0KB"
+			diff_str_b="0B"
+		fi
+
+		printf "%-15s | %-12s | %-12s | %-12s | %-10s\n" \
+			"$label" "$current_kb" "$diff_str_kb" "$diff_str_b" "$status"
+	done < ".build_summary.tmp"
+
+	rm ".build_summary.tmp"
+else
+	echo "No summary data available."
+fi
 log_sep
 
 # Finalize sizes
