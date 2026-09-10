@@ -21,10 +21,10 @@ if [ -f ./u-boot.img ] ; then
 	rm -rf ./u-boot.img || true
 fi
 
-wget https://github.com/beagleboard/u-boot-beagleboneai64/releases/download/v2026.01-Beagle-11.02.11/sysfw.itb
-wget https://github.com/beagleboard/u-boot-beagleboneai64/releases/download/v2026.01-Beagle-11.02.11/tiboot3.bin
-wget https://github.com/beagleboard/u-boot-beagleboneai64/releases/download/v2026.01-Beagle-11.02.11/tispl.bin
-wget https://github.com/beagleboard/u-boot-beagleboneai64/releases/download/v2026.01-Beagle-11.02.11/u-boot.img
+wget https://github.com/beagleboard/u-boot-beagleboneai64/releases/download/v2026.04-Beagle-11.02.18/sysfw.itb
+wget https://github.com/beagleboard/u-boot-beagleboneai64/releases/download/v2026.04-Beagle-11.02.18/tiboot3.bin
+wget https://github.com/beagleboard/u-boot-beagleboneai64/releases/download/v2026.04-Beagle-11.02.18/tispl.bin
+wget https://github.com/beagleboard/u-boot-beagleboneai64/releases/download/v2026.04-Beagle-11.02.18/u-boot.img
 
 sync
 
